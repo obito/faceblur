@@ -11,8 +11,12 @@ You also have to install dlib, you can get instruction [here](https://github.com
 
 # How to use
 
-You can download the binaries for your platform in the [release](https://github.com/obito/faceblur/releases), but you still need to images folder with the model data.
-
 Create a dist folder in the same directory of the binary, and put the images that you want to blur in the images folder.
 
 Run the program, and you will get the blurred faces in dist folder.
+
+# Example
+
+Before             |  After
+:-------------------------:|:-------------------------:
+![](https://raw.githubusercontent.com/obito/faceblur/master/images/img.jpg)  |  ![](https://raw.githubusercontent.com/obito/faceblur/master/dist/img-blurred.jpg)
