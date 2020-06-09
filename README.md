@@ -11,12 +11,29 @@ You also have to install dlib, you can get instruction [here](https://github.com
 
 # How to use
 
-Create a dist folder in the same directory of the binary, and put the images that you want to blur in the images folder.
+
+Clone this repo, put the images that you want to blur in the images folder.
 
 Run the program, and you will get the blurred faces in dist folder.
+
+```
+git clone https://github.com/obito/faceblur
+cd faceblur
+go mod download
+go run .
+```
+
+* `-cnn` flag is used to tell if it should use CNN for recognition. Default is false.
+
+Unfortunately I can't provide binaries because of OpenCV limitations, I can't cross compile CGO.
 
 # Example
 
 Before             |  After
 :-------------------------:|:-------------------------:
 ![](https://raw.githubusercontent.com/obito/faceblur/master/images/img.jpg)  |  ![](https://raw.githubusercontent.com/obito/faceblur/master/dist/img-blurred.jpg)
+
+
+Before             |  After
+:-------------------------:|:-------------------------:
+![](https://raw.githubusercontent.com/obito/faceblur/master/assets/head-pose-face-detection-male.gif)  |  ![](https://raw.githubusercontent.com/obito/faceblur/master/assets/head-pose-face-detection-male-blurred.gif)

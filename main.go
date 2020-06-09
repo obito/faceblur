@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"image"
 	"io/ioutil"
 	"log"
@@ -18,9 +19,13 @@ func main() {
 		"jpg",
 		"png",
 		"jpeg",
+		"mp4",
 	}
 
-	rec, err := face.NewRecognizer(dataDir)
+	var cnnMode = flag.Bool("cnn", false, "run with ccn mode")
+	flag.Parse()
+
+	rec, err := face.NewRecognizer("data")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,21 +48,87 @@ func main() {
 
 		img := filepath.Join(dataDir, file.Name())
 
-		faces, err := rec.RecognizeFile(img)
-		if err != nil {
-			log.Fatalf("Can't recognize: %v", err)
+		if ext == "mp4" {
+			video, err := gocv.OpenVideoCapture(img)
+			if err != nil {
+				log.Printf("error opening video: %v\n", err)
+				return
+			}
+
+			defer video.Close()
+
+			videoHeight := int(video.Get(gocv.VideoCaptureFrameHeight))
+			videoWidth := int(video.Get(gocv.VideoCaptureFrameWidth))
+			videoWrite, err := gocv.VideoWriterFile("dist/"+extSplited[0]+"-blurred.mp4", "MP4V", video.Get(gocv.VideoCaptureFPS), videoWidth, videoHeight, true)
+
+			if err != nil {
+				log.Fatalf("error init write video: %v", err)
+			}
+
+			for video.IsOpened() {
+				imgMat := gocv.NewMat()
+
+				frame := video.Read(&imgMat)
+
+				if !frame {
+					break
+				}
+
+				jpgFile, err := gocv.IMEncode(gocv.JPEGFileExt, imgMat)
+
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				var faces []face.Face
+				if *cnnMode {
+					faces, err = rec.RecognizeCNN(jpgFile)
+				} else {
+					faces, err = rec.Recognize(jpgFile)
+				}
+
+				if err != nil {
+					log.Fatalf("Can't recognize: %v", err)
+				}
+
+				log.Print(file.Name()+" Faces ", len(faces))
+
+				for _, face := range faces {
+					imgFace := imgMat.Region(face.Rectangle)
+
+					gocv.GaussianBlur(imgFace, &imgFace, image.Pt(75, 75), 0, 0, gocv.BorderDefault)
+					imgFace.Close()
+				}
+
+				videoWrite.Write(imgMat)
+			}
+
+			videoWrite.Close()
+			video.Close()
+		} else {
+
+			var faces []face.Face
+			if *cnnMode {
+				faces, err = rec.RecognizeFileCNN(img)
+			} else {
+				faces, err = rec.RecognizeFile(img)
+			}
+
+			if err != nil {
+				log.Fatalf("Can't recognize: %v", err)
+			}
+
+			log.Print(file.Name()+" Faces ", len(faces))
+			photo := gocv.IMRead(img, gocv.IMReadColor)
+			for _, face := range faces {
+				imgFace := photo.Region(face.Rectangle)
+
+				gocv.GaussianBlur(imgFace, &imgFace, image.Pt(75, 75), 0, 0, gocv.BorderDefault)
+				imgFace.Close()
+			}
+
+			gocv.IMWrite("dist/"+extSplited[0]+"-blurred."+ext, photo)
 		}
-
-		log.Print(file.Name()+" Faces ", len(faces))
-		photo := gocv.IMRead(img, gocv.IMReadColor)
-		for _, face := range faces {
-			imgFace := photo.Region(face.Rectangle)
-
-			gocv.GaussianBlur(imgFace, &imgFace, image.Pt(75, 75), 0, 0, gocv.BorderDefault)
-			imgFace.Close()
-		}
-
-		gocv.IMWrite("dist/"+extSplited[0]+"-blurred."+ext, photo)
 	}
 }
 
