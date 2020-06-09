@@ -34,6 +34,6 @@ Before             |  After
 ![](https://raw.githubusercontent.com/obito/faceblur/master/images/img.jpg)  |  ![](https://raw.githubusercontent.com/obito/faceblur/master/dist/img-blurred.jpg)
 
 
-Before             |  After
+Before (without CNN)           |  After (without CNN)
 :-------------------------:|:-------------------------:
 ![](https://raw.githubusercontent.com/obito/faceblur/master/assets/head-pose-face-detection-male.gif)  |  ![](https://raw.githubusercontent.com/obito/faceblur/master/assets/head-pose-face-detection-male-blurred.gif)
